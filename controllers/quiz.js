@@ -224,3 +224,49 @@ exports.check = (req, res, next) => {
         answer
     });
 };
+exports.randomplay = (req, res, next) => {
+    req.session.randomPlay = req.session.randomPlay || [];
+
+    const whereOpt = {'id':{[Sequelize.Op.notIn]: req.session.randomPlay}};
+    models.quiz.count({where: whereOpt})
+        .then(count => {
+        if (!count) {
+        const score = req.session.randomPlay.length;
+        req.session.randomPlay = [];
+        res.render('quizzes/random_nomore', {
+            score: score
+        });
+    }
+    return models.quiz.findAll({
+        where: whereOpt,
+        offset: Math.floor(Math.random() * count),
+        limit: 1
+    })
+})
+.then(quiz => {
+        res.render('quizzes/random_play', {
+        quiz: quiz[0],
+        score: req.session.randomPlay.length
+    });
+})
+.catch(error => {
+        next(error);
+});
+};
+exports.randomcheck = (req, res, next) => {
+    const {quiz, query} = req;
+    const answer = query.answer || "";
+    const result = answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim();
+    // const score = req.session.randomPlay.length+result;
+    const score = req.session.randomPlay.length;
+    if(result) { if(req.session.randomPlay.indexOf(req.quiz.id) === -1)
+            req.session.randomPlay = req.session.randomPlay.concat(quiz.id);
+    } else {
+        req.session.randomPlay = []; //almacen de la sesion
+    }
+    res.render('quizzes/random_result', {
+        result,
+        answer,
+        score
+    });
+};

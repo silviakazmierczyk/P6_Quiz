@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 
@@ -5,8 +6,6 @@ const quizController = require('../controllers/quiz');
 const tipController = require('../controllers/tip');
 const userController = require('../controllers/user');
 const sessionController = require('../controllers/session');
-
-//-----------------------------------------------------------
 
 // autologout
 router.all('*',sessionController.deleteExpiredUserSession);
@@ -41,15 +40,15 @@ router.get([
 
 //-----------------------------------------------------------
 
+var express = require('express');
+var router = express.Router();
+
+
 /* GET home page. */
-router.get('/', (req, res, next) => {
-  res.render('index');
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express' });
 });
 
-// Author page.
-router.get('/author', (req, res, next) => {
-    res.render('author');
-});
 
 
 // Autoload for routes using :quizId
@@ -133,6 +132,5 @@ router.delete('/quizzes/:quizId(\\d+)/tips/:tipId(\\d+)',
     sessionController.loginRequired,
     quizController.adminOrAuthorRequired,
     tipController.destroy);
-
 
 module.exports = router;
